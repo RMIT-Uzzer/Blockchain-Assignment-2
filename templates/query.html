@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Search Records{% endblock %}
+{% block content %}
+<h2>Search Item by ID</h2>
+<form method="POST" action="/search">
+    <input name="inventory" placeholder="Inventory (A/B/C/D)" class="form-control" required>
+    <input name="item_id" placeholder="Item ID" class="form-control mt-2" required>
+    <button type="submit" class="btn btn-success mt-3">Search</button>
+</form>
+
+{% if searched %}
+    {% if results %}
+        <h4 class="mt-4">Search Results:</h4>
+        <ul class="list-group mt-2">
+            {% for item in results %}
+                <li class="list-group-item">
+                    ID: {{ item.id }} | Qty: {{ item.qty }} | Price: ${{ item.price }} | Location: {{ item.location }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="mt-4 text-danger"> No records found.</p>
+    {% endif %}
+{% endif %}
+{% endblock %}
