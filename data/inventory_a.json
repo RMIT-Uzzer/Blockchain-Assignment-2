@@ -34,5 +34,17 @@
         "QTY": 50,
         "Price": 25,
         "Location": "D"
+    },
+    {
+        "id": "001",
+        "qty": 100,
+        "price": 200.0,
+        "location": "D"
+    },
+    {
+        "id": "001",
+        "qty": 1,
+        "price": 100.0,
+        "location": "D"
     }
 ]
