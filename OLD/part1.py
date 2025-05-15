@@ -111,7 +111,7 @@ def index():
                 with open(inventory_file, "w") as f:
                     json.dump(data, f, indent=2)
 
-    return render_template("task1_task2.html", result=result, nodes=list(inventory_keys.keys()))
+    return render_template("part1\templates\task1_task2.html", result=result, nodes=list(inventory_keys.keys()))
 
 if __name__ == "__main__":
     app.run(debug=True)

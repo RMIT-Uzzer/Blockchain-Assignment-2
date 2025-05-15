@@ -22,22 +22,5 @@
     "QTY": 12,
     "Price": 18,
     "Location": "A"
-  },
-  {
-    "ID": "ID005",
-    "QTY": 300,
-    "Price": 22,
-    "Location": "C"
-  },
-  {
-    "ID": "ID006",
-    "QTY": 50,
-    "Price": 25,
-    "Location": "D"
-  },
-  {
-    "ID": "333",
-    "QTY": 333,
-    "Price": 333
   }
 ]

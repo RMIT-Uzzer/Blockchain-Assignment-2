@@ -4,8 +4,7 @@ import hashlib
 from flask import Flask, render_template, request, session
 
 app = Flask(__name__)
-app.secret_key = "super_secret_and_unique_key_123"
-
+app.secret_key = "secrettt"
 
 def load_parameters(filepath="parameters.txt"):
     section = None
@@ -35,8 +34,9 @@ def load_parameters(filepath="parameters.txt"):
     return identities, randoms, pkg_keys, procurement_keys
 
 IDENTITIES, RANDOM_VALUES, PKG_KEYS, PROCUREMENT_KEYS = load_parameters("parameters.txt")
-'''
-IDENTITIES = {
+
+# old
+'''IDENTITIES = {
     "Inventory A": 126,
     "Inventory B": 127,
     "Inventory C": 128,
@@ -57,8 +57,8 @@ PROCUREMENT_KEYS = {
     "p": 1080954735722463992988394149602856332100628417,
     "q": 1158106283320086444890911863299879973542293243,
     "e": 106506253943651610547613
-}'''
-
+}
+'''
 def mod_inverse(e, phi):
     def egcd(a, b):
         if a == 0: return b, 0, 1
@@ -103,7 +103,7 @@ def decrypt(ciphertext, priv_key):
     return m.to_bytes((m.bit_length() + 7) // 8, "big").decode()
 
 def load_record(inv_key, item_id):
-    filename = f"inventory_{inv_key.lower()}.json"
+    filename = os.path.join("DATA", f"inventory_{inv_key.lower()}.json")
     if not os.path.exists(filename):
         return None
     with open(filename) as f:
