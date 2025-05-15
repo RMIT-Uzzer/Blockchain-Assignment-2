@@ -6,6 +6,36 @@ from flask import Flask, render_template, request, session
 app = Flask(__name__)
 app.secret_key = "super_secret_and_unique_key_123"
 
+
+def load_parameters(filepath="parameters.txt"):
+    section = None
+    identities = {}
+    randoms = {}
+    pkg_keys = {}
+    procurement_keys = {}
+
+    with open(filepath, "r") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if line.startswith("[") and line.endswith("]"):
+                section = line[1:-1]
+                continue
+            key, val = line.split(",", 1)
+            val = int(val)
+            if section == "Identities":
+                identities[key] = val
+            elif section == "RandomValues":
+                randoms[key] = val
+            elif section == "PKGKeys":
+                pkg_keys[key] = val
+            elif section == "ProcurementKeys":
+                procurement_keys[key] = val
+    return identities, randoms, pkg_keys, procurement_keys
+
+IDENTITIES, RANDOM_VALUES, PKG_KEYS, PROCUREMENT_KEYS = load_parameters("parameters.txt")
+'''
 IDENTITIES = {
     "Inventory A": 126,
     "Inventory B": 127,
@@ -27,7 +57,7 @@ PROCUREMENT_KEYS = {
     "p": 1080954735722463992988394149602856332100628417,
     "q": 1158106283320086444890911863299879973542293243,
     "e": 106506253943651610547613
-}
+}'''
 
 def mod_inverse(e, phi):
     def egcd(a, b):
