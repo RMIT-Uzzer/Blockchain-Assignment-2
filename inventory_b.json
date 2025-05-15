@@ -1,7 +1,7 @@
 [
     {
         "ID": "001",
-        "QTY": 32,
+        "QTY": 31,
         "Price": 12,
         "Location": "D"
     },
@@ -28,11 +28,5 @@
         "QTY": 300,
         "Price": 22,
         "Location": "C"
-    },
-    {
-        "ID": "ID006",
-        "QTY": 50,
-        "Price": 25,
-        "Location": "D"
     }
 ]

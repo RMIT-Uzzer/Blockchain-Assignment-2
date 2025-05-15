@@ -4,9 +4,8 @@ import hashlib
 from flask import Flask, render_template, request, session
 
 app = Flask(__name__)
-app.secret_key = "super_secret_and_unique_key_123"  # Just a random dev key — replace in prod
+app.secret_key = "super_secret_and_unique_key_123"
 
-# Node configuration
 IDENTITIES = {
     "Inventory A": 126,
     "Inventory B": 127,
@@ -19,8 +18,6 @@ RANDOM_VALUES = {
     "Inventory C": 821,
     "Inventory D": 921
 }
-
-# Key pairs for signing and encryption
 PKG_KEYS = {
     "p": 1004162036461488639338597000466705179253226703,
     "q": 950133741151267522116252385927940618264103623,
@@ -32,7 +29,6 @@ PROCUREMENT_KEYS = {
     "e": 106506253943651610547613
 }
 
-# --- RSA / Signature Utilities ---
 def mod_inverse(e, phi):
     def egcd(a, b):
         if a == 0: return b, 0, 1
@@ -76,7 +72,6 @@ def decrypt(ciphertext, priv_key):
     m = pow(ciphertext, d, n)
     return m.to_bytes((m.bit_length() + 7) // 8, "big").decode()
 
-# Load an inventory record by file and ID
 def load_record(inv_key, item_id):
     filename = f"inventory_{inv_key.lower()}.json"
     if not os.path.exists(filename):
@@ -85,7 +80,6 @@ def load_record(inv_key, item_id):
         data = json.load(f)
     return next((item for item in data if item["ID"] == item_id), None)
 
-# --- Web Route ---
 @app.route("/", methods=["GET", "POST"])
 def task3_ui():
     result = {}
@@ -95,8 +89,8 @@ def task3_ui():
 
         pkg_n = PKG_KEYS["p"] * PKG_KEYS["q"]
         partial_sigs, partial_log, messages = [], [], {}
+        records = {}
 
-        # Loop through each inventory node
         for key in ["A", "B", "C", "D"]:
             label = f"Inventory {key}"
             record = load_record(key, item_id)
@@ -105,6 +99,26 @@ def task3_ui():
                 result["error"] = f"Item ID '{item_id}' not found in {label}"
                 return render_template("task3.html", result=result, last_item_id=session.get("last_item_id", ""))
 
+            records[label] = record
+
+        # Compare fields for mismatches
+        base_record = next(iter(records.values()))
+        mismatches = []
+
+        for label, rec in records.items():
+            for field in ["QTY", "Price", "Location"]:
+                if rec[field] != base_record[field]:
+                    mismatches.append(f"{label} → {field} = {rec[field]} (expected {base_record[field]})")
+
+        if mismatches:
+            result["error"] = (
+                "Mismatch detected in inventory data across nodes:<br><ul>" +
+                "".join(f"<li>{m}</li>" for m in mismatches) +
+                "</ul>Please ensure QTY, Price, and Location are consistent in all inventories."
+            )
+            return render_template("task3.html", result=result, last_item_id=session.get("last_item_id", ""))
+
+        for label, record in records.items():
             msg = f"Item: {item_id}, QTY: {record['QTY']}, Location: {record['Location']}"
             messages[label] = msg
 
@@ -118,16 +132,15 @@ def task3_ui():
         agg = aggregate_signatures(partial_sigs, pkg_n)
         verified = verify_multisig(agg, messages, IDENTITIES, RANDOM_VALUES, pkg_n)
 
-        # Encrypt with Procurement Officer's public key
         po_pub, po_priv = generate_rsa_keys(**PROCUREMENT_KEYS)
         encrypted = encrypt(messages["Inventory A"], po_pub)
         decrypted = decrypt(encrypted, po_priv)
 
         result = {
             "item_id": item_id,
-            "qty": record["QTY"],
-            "price": record["Price"],
-            "location": record["Location"],
+            "qty": base_record["QTY"],
+            "price": base_record["Price"],
+            "location": base_record["Location"],
             "message": messages["Inventory A"],
             "partial_log": partial_log,
             "aggregated": agg,

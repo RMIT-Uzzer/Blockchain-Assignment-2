@@ -46,7 +46,7 @@
     </form>
 
     {% if result.error %}
-        <p class="invalid"><strong>Error:</strong> {{ result.error }}</p>
+        <p class="invalid"><strong>Error:</strong> {{ result.error|safe }}</p>
     {% endif %}
 
     {% if result.message %}
