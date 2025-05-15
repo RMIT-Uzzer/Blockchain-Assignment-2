@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request
 import hashlib
 import json
@@ -76,7 +75,7 @@ def index():
         consensus_count = 0
         for other_node in inventory_keys:
             is_valid = verify_signature(msg, signature, pub_key)
-            verifications[other_node] = "✅ Accepted" if is_valid else "❌ Rejected"
+            verifications[other_node] = "Accepted" if is_valid else "Rejected"
             if is_valid:
                 consensus_count += 1
 
@@ -86,7 +85,7 @@ def index():
             "message": msg,
             "signature": signature,
             "verifications": verifications,
-            "consensus": "✔️ Consensus Achieved" if consensus_success else "❌ Consensus Failed",
+            "consensus": "Consensus Achieved" if consensus_success else "Consensus Failed",
             "n": n,
             "phi": phi,
             "d": d
@@ -101,13 +100,12 @@ def index():
                 "inventory_c.json",
                 "inventory_d.json"
             ]:
-                try:
-                    if os.path.exists(inventory_file):
-                        with open(inventory_file, "r") as f:
-                            data = json.load(f)
-                    else:
-                        data = []
-                except:
+            
+                if os.path.exists(inventory_file):
+                    print(inventory_file)
+                    with open(inventory_file, "r") as f:
+                        data = json.load(f)
+                else:
                     data = []
                 data.append(new_record)
                 with open(inventory_file, "w") as f:
