@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task 1 & 2 - Submit New Record</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 900px;
+            margin: auto;
+        }
+        input, select, button {
+            padding: 8px;
+            margin: 10px 0;
+            width: 300px;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            overflow-x: auto;
+            border-left: 4px solid #ccc;
+        }
+        .valid { color: green; }
+        .invalid { color: red; }
+    </style>
+</head>
+<body>
+    <h2>Blockchain Record Submission (Task 1 & 2)</h2>
+    <form method="POST">
+        <label><strong>Submitting Inventory Node:</strong></label><br>
+        <select name="node" required>
+            {% for node in nodes %}
+            <option value="{{ node }}">{{ node }}</option>
+            {% endfor %}
+        </select><br>
+
+        <label><strong>Item ID:</strong></label><br>
+        <input type="text" name="item_id" placeholder="e.g., 005" required><br>
+
+        <label><strong>Quantity:</strong></label><br>
+        <input type="number" name="qty" min="1" required><br>
+
+        <label><strong>Price:</strong></label><br>
+        <input type="number" name="price" min="1" required><br>
+
+        <button type="submit">Submit Record</button>
+    </form>
+
+    {% if result %}
+    <hr>
+    <h3>Submitted by {{ result.node }}</h3>
+    <p><strong>Message:</strong> {{ result.message }}</p>
+    <p><strong>Signature:</strong></p>
+    <pre>{{ result.signature }}</pre>
+
+    <h4>Verification Results</h4>
+    <ul>
+        {% for node, status in result.verifications.items() %}
+        <li><strong>{{ node }}:</strong> <span class="{{ 'valid' if 'Accepted' in status else 'invalid' }}">{{ status }}</span></li>
+        {% endfor %}
+    </ul>
+
+    <h4>Consensus Status</h4>
+    <p class="{{ 'valid' if 'Achieved' in result.consensus else 'invalid' }}">{{ result.consensus }}</p>
+
+    <h4>RSA Parameters (Used by {{ result.node }})</h4>
+    <pre>
+n = {{ result.n }}
+phi(n) = {{ result.phi }}
+d = {{ result.d }}
+    </pre>
+    {% endif %}
+</body>
+</html>
