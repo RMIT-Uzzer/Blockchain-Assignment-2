@@ -110,8 +110,9 @@ def task3_ui():
                 if rec[field] != base_record[field]:
                     mismatches.append(f"{label} → {field} = {rec[field]} (expected {base_record[field]})")
 
+        ref_vals = [f"Inventory A → {field} = {base_record[field]}" for field in ["QTY", "Price", "Location"]]
         if mismatches:
-            result["error"] = (
+            result["error"] = ("<div><strong>Reference (Inventory A):</strong><ul>" + "".join(f"<li>{r}</li>" for r in ref_vals) + "</ul></div>" +
                 "Mismatch detected in inventory data across nodes:<br><ul>" +
                 "".join(f"<li>{m}</li>" for m in mismatches) +
                 "</ul>Please ensure QTY, Price, and Location are consistent in all inventories."
