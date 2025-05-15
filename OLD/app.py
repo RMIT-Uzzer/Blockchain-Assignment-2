@@ -34,7 +34,7 @@ def verify_signature(msg, sig, public_key):
     m = hash_message(msg)
     return pow(sig, e, n) == m
 
-# Fully hardcoded RSA parameters per Inventory
+# Fully hardcoded RSA parameters per Inventory as required
 inventory_keys = {
     "Inventory A": {
         "p": 1210613765735147311106936311866593978079938707,
@@ -75,8 +75,9 @@ def index():
         verifications = {}
         consensus_count = 0
         for other_node in inventory_keys:
+            # All use the submitter's public key
             is_valid = verify_signature(msg, signature, pub_key)
-            verifications[other_node] = "✅ Accepted" if is_valid else "❌ Rejected"
+            verifications[other_node] = "✅ Accepted" if is_valid else "Rejected"
             if is_valid:
                 consensus_count += 1
 
@@ -86,7 +87,7 @@ def index():
             "message": msg,
             "signature": signature,
             "verifications": verifications,
-            "consensus": "✔️ Consensus Achieved" if consensus_success else "❌ Consensus Failed",
+            "consensus": "✔️ Consensus Achieved" if consensus_success else "Consensus Failed",
             "n": n,
             "phi": phi,
             "d": d
@@ -95,22 +96,19 @@ def index():
         # On consensus, append to all four inventory files
         if consensus_success:
             new_record = {"ID": item_id, "QTY": qty, "Price": price}
-            for inventory_file in [
-                "inventory_a.json",
-                "inventory_b.json",
-                "inventory_c.json",
-                "inventory_d.json"
-            ]:
-                try:
-                    if os.path.exists(inventory_file):
-                        with open(inventory_file, "r") as f:
+            for label in ["a", "b", "c", "d"]:
+                file_path = f"inventory_{label}.json"
+                print(file_path)
+                if os.path.exists(file_path):
+                    with open(file_path, "r") as f:
+                        try:
                             data = json.load(f)
-                    else:
-                        data = []
-                except:
+                        except:
+                            data = []
+                else:
                     data = []
                 data.append(new_record)
-                with open(inventory_file, "w") as f:
+                with open(file_path, "w") as f:
                     json.dump(data, f, indent=2)
 
     return render_template("task1_task2.html", result=result, nodes=list(inventory_keys.keys()))

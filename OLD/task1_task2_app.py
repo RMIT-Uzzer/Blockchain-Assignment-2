@@ -34,28 +34,11 @@ def verify_signature(msg, sig, public_key):
     m = hash_message(msg)
     return pow(sig, e, n) == m
 
-# Fully hardcoded RSA parameters per Inventory
 inventory_keys = {
-    "Inventory A": {
-        "p": 1210613765735147311106936311866593978079938707,
-        "q": 1247842850282035753615951347964437248190231863,
-        "e": 815459040813953176289801
-    },
-    "Inventory B": {
-        "p": 787435686772982288169641922308628444877260947,
-        "q": 1325305233886096053310340418467385397239375379,
-        "e": 692450682143089563609787
-    },
-    "Inventory C": {
-        "p": 1014247300991039444864201518275018240361205111,
-        "q": 904030450302158058469475048755214591704639633,
-        "e": 1158749422015035388438057
-    },
-    "Inventory D": {
-        "p": 1287737200891425621338551020762858710281638317,
-        "q": 1330909125725073469794953234151525201084537607,
-        "e": 33981230465225879849295979
-    }
+    "Inventory A": {"p": 1210613765735147311106936311866593978079938707, "q": 1247842850282035753615951347964437248190231863, "e": 815459040813953176289801},
+    "Inventory B": {"p": 787435686772982288169641922308628444877260947, "q": 1325305233886096053310340418467385397239375379, "e": 692450682143089563609787},
+    "Inventory C": {"p": 1014247300991039444864201518275018240361205111, "q": 904030450302158058469475048755214591704639633, "e": 1158749422015035388438057},
+    "Inventory D": {"p": 1287737200891425621338551020762858710281638317, "q": 1330909125725073469794953234151525201084537607, "e": 33981230465225879849295979}
 }
 
 @app.route("/", methods=["GET", "POST"])
@@ -68,14 +51,15 @@ def index():
         price = int(request.form["price"])
         msg = f"Item: {item_id} | QTY: {qty} | Price: {price}"
 
-        keys = inventory_keys[node]
-        pub_key, priv_key, n, phi, d = generate_rsa_keys(keys["p"], keys["q"], keys["e"])
+        node_keys = inventory_keys[node]
+        pub_key, priv_key, n, phi, d = generate_rsa_keys(node_keys["p"], node_keys["q"], node_keys["e"])
         signature = sign_message(msg, priv_key)
 
         verifications = {}
         consensus_count = 0
-        for other_node in inventory_keys:
-            is_valid = verify_signature(msg, signature, pub_key)
+        for other_node, data in inventory_keys.items():
+            other_pub_key, _, _, _, _ = generate_rsa_keys(data["p"], data["q"], data["e"])
+            is_valid = verify_signature(msg, signature, pub_key)  # use original node's public key
             verifications[other_node] = "✅ Accepted" if is_valid else "❌ Rejected"
             if is_valid:
                 consensus_count += 1
@@ -92,25 +76,18 @@ def index():
             "d": d
         }
 
-        # On consensus, append to all four inventory files
+        # Simulate appending to JSON database
         if consensus_success:
-            new_record = {"ID": item_id, "QTY": qty, "Price": price}
-            for inventory_file in [
-                "inventory_a.json",
-                "inventory_b.json",
-                "inventory_c.json",
-                "inventory_d.json"
-            ]:
-                try:
-                    if os.path.exists(inventory_file):
-                        with open(inventory_file, "r") as f:
-                            data = json.load(f)
-                    else:
-                        data = []
-                except:
+            record = {"ID": item_id, "QTY": qty, "Price": price}
+            for key in ["a", "b", "c", "d"]:
+                path = f"inventory_{key}.json"
+                if os.path.exists(path):
+                    with open(path, "r") as f:
+                        data = json.load(f)
+                else:
                     data = []
-                data.append(new_record)
-                with open(inventory_file, "w") as f:
+                data.append(record)
+                with open(path, "w") as f:
                     json.dump(data, f, indent=2)
 
     return render_template("task1_task2.html", result=result, nodes=list(inventory_keys.keys()))
