@@ -34,7 +34,6 @@ def verify_signature(msg, sig, public_key):
     m = hash_message(msg)
     return pow(sig, e, n) == m
 
-#  hardcoded RSA parameters per Inventory
 inventory_keys = {
     "Inventory A": {
         "p": 1210613765735147311106936311866593978079938707,
@@ -86,28 +85,28 @@ def index():
             "message": msg,
             "signature": signature,
             "verifications": verifications,
-            "consensus": "Consensus ACIEVED" if consensus_success else "Consensus FAILED",
+            "consensus": "Consensus Achieved" if consensus_success else "Consensus Failed",
             "n": n,
             "phi": phi,
             "d": d
         }
 
-        # On consensus, append to all four inventory files
         if consensus_success:
-            new_record = {"ID": item_id, "QTY": qty, "Price": price}
+            location = node[-1]
+            new_record = {"ID": item_id, "QTY": qty, "Price": price, "Location": location}
             for inventory_file in [
                 os.path.join("DATA", "inventory_a.json"),
                 os.path.join("DATA", "inventory_b.json"),
                 os.path.join("DATA", "inventory_c.json"),
                 os.path.join("DATA", "inventory_d.json")
             ]:
-                try:
-                    if os.path.exists(inventory_file):
-                        with open(inventory_file, "r") as f:
+                if os.path.exists(inventory_file):
+                    with open(inventory_file, "r") as f:
+                        try:
                             data = json.load(f)
-                    else:
-                        data = []
-                except:
+                        except:
+                            data = []
+                else:
                     data = []
                 data.append(new_record)
                 with open(inventory_file, "w") as f:
