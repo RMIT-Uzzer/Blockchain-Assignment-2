@@ -34,7 +34,7 @@ def verify_signature(msg, sig, public_key):
     m = hash_message(msg)
     return pow(sig, e, n) == m
 
-# Fully hardcoded RSA parameters per Inventory
+#  hardcoded RSA parameters per Inventory
 inventory_keys = {
     "Inventory A": {
         "p": 1210613765735147311106936311866593978079938707,
